@@ -92,7 +92,13 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#1parallel-gwas">1.Parallel GWAS</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2parallel-qtl-detection-based-on-gwas-results">2.Parallel QTL detection based on GWAS results</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#3annotation-of-qtl-regions">3.Annotation of QTL regions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4visualization-of-gwas-results">4.Visualization of GWAS results</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#5statistical-test-of-lead-snp">5.Statistical test of lead SNP</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#6statistical-test-of-genes">6.Statistical test of genes</a>
     </li>
@@ -170,7 +176,7 @@ MRBIGR.py geno -convert -hapmap test.hapmap -o test_hmp  
 # VCF to plink-bed  
 MRBIGR.py geno -convert -vcf test.vcf -o test_vcf  
 # plink-bed to VCF  
-MRBIGR.py geno –g geno –o geno.vcf  
+MRBIGR.py geno -convert –g geno –o geno.vcf  
 </code></pre>
 <p>The subcommand <code>geno</code> invokes the genotype data analysis module; parameter <code>–convert</code> calls the data format conversion function; <code>-hapmap</code> and <code>–vcf</code> are the correspond format file name; <code>-g</code> is the prefix of plink-bed format input data, <code>-o</code> is the name of output data.</p>
 <h3 id="2quality-control-of-genotype-data">2.Quality control of genotype data</h3>
@@ -219,15 +225,15 @@ MRBIGR.py geno –g geno –o geno.vcf  
 <p>The phenotype data analysis module takes a CSV format phenotype file with the first column and the first row should be the names of samples and traits as input, can be invoked through the subcommand <code>pheno</code>, which includes 5 functions: <code>-qc</code>, <code>-imput</code>, <code>-scale</code>, <code>-correct</code>, and <code>–merge</code>. <code>-qc</code> is used for quality control of phenotype data; <code>-imput</code> is used for imputation of missing values in phenotype data; <code>-scale</code> is used for data scaling, normalization, standardization or transformation of phenotype data; <code>-correct</code> is used for population structure based phenotype data correction; <code>-merge</code> is used to merge a trait from different environment or years using either the methods of mean values, BLUP or BLUE.</p>
 <h3 id="1quality-control-of-phenotype-data">1.Quality control of phenotype data</h3>
 <p>Quality control of the original phenotype data include transposition of the original phenotype matrix if needed, removal of outlier data points based on z-score or boxplot methods, filtering traits with high level of missing rate and low average values. In this function, either of the parameters <code>–tr</code>, <code>–rout</code>, <code>-mis</code> and <code>–val</code> is optional. If you want to perform quality control use all the default parameters, the command line looks like this</p>
-<pre><code class="language-py">MRBIGR.py pheno –qc -p pheno.csv -o pheno_qc -rout -mis -val  
+<pre><code class="language-py">MRBIGR.py pheno –-qc -p pheno.csv -o pheno_qc -rout  zscore -mis 0.1 -val  0.1  
 </code></pre>
 <p>The subcommand <code>pheno</code> invokes the phenotype analysis module; parameter <code>–qc</code> calls the quality control function; <code>-p</code> is the input phenotype matrix; <code>-o</code> is the prefix of output file; <code>-mis</code> is the missing rate cutoff with default value 0.5; <code>-val</code> is the small value cutoff with default value 0.1; <code>-rout</code> means outlier removal of phenotypic values with the default method z-score. If you want to perform quality control use personalized parameters, the command line could be as follows:</p>
 <pre><code class="language-py"># transposition of the original phenotype matrix  
-MRBIGR.py pheno –qc -tr pheno.csv -o pheno_tr  
+MRBIGR.py pheno –qc -tr -p pheno.csv -o pheno_tr  
 # reset missing rate cutoff, skip small value filter and outlier removal  
 MRBIGR.py pheno –qc -p pheno.csv -o pheno_qc -mis 0.1  
 # skip small value filter and set outlier removal method to boxplot  
-MRBIGR.py pheno –qc -p pheno.csv -o pheno_qc -rout boxplot –mis  
+MRBIGR.py pheno –qc -p pheno.csv -o pheno_qc -rout boxplot –mis 0.1
 </code></pre>
 <h3 id="2imputation-of-missing-phenotype-values">2.Imputation of missing phenotype values</h3>
 <p>There are three different phenotype imputation methods provided by MRBIGR: <code>mean</code>, <code>median</code>, <code>most_frequent</code>. The missing phenotype values in input file should be defined as NA, and the command line is as follows:</p>
@@ -250,53 +256,49 @@ MRBIGR.py pheno –qc -p pheno.csv -o pheno_qc -rout boxplot –mis  
 </code></pre>
 <p>The subcommand <code>pheno</code> invokes the phenotype analysis module; parameter <code>–merge</code> calls the phenotype merge function; <code>-p</code> is the input phenotype matrix for a trait in CSV format;<code>-o</code> is the prefix of output file; <code>-mm</code> is the merge method. After this step, a phenotype file named <font color=blue>trait1_blup.phe.csv</font> with BLUP merged phenotypic values would be generated.</p>
 <h2 id="gwas-and-qtl-related-analysis">GWAS and QTL related analysis</h2>
-<p>The GWAS and QTL related analysis module can be utilized for GWAS, QTL detection and annotation, as well as peak or gene based haplotype analysis, this module can be invoked through the subcommand gwas, which includes 6 functions: -gwas, -qtl, -anno, -visual, -peaktest, and –genetest. –gwas is used to perform GWAS, -qtl is used to detect QTLs from GWAS results, -anno is used for annotation of QTL regions, -visual is used for the visualization of GWAS results, -peaktest is used for peak based haplotype test, -genetest is used for gene based haplotype test.</p>
+<p>The GWAS and QTL related analysis module can be utilized for GWAS, QTL detection and annotation, as well as peak or gene based haplotype analysis, this module can be invoked through the subcommand <code>gwas</code>, which includes 6 functions: <code>-gwas</code>, <code>-qtl</code>, <code>-anno</code>, <code>-visual</code>, <code>-peaktest</code>, and <code>–genetest</code>. <code>–gwas</code> is used to perform GWAS, <code>-qtl</code> is used to detect QTLs from GWAS results, <code>-anno</code> is used for annotation of QTL regions, <code>-visual</code> is used for the visualization of GWAS results, <code>-peaktest</code> is used for peak based haplotype test, <code>-genetest</code> is used for gene based haplotype test.</p>
 <h3 id="1parallel-gwas">1.Parallel GWAS</h3>
 <p>MRBIGR support parallel GWAS for multiple traits. Take the processed plink-bed format genotype data and CSV format phenotype data as inputs, GWAS can be performed through the below command:</p>
-<pre><code class="language-py">MRBIGR.py gwas -gwas -model lmm -thread 12 -g geno_qc -p pheno_norm.csv 
-``` 
-The subcommand gwas invokes the GWAS and QTL analysis module; parameter –gwas calls the GWAS function which utilizes GEMMA to perform GWAS; -model is the model to fit, with either linear mixed model (lmm) or linear model (lm) as option; -thread is the thread number to run the command; -g is the plink-bed format input genotype data; -p is the CSV format phenotype data. After this step, an output directory would be generated with the GWAS result files named trait_name.assoc.txt in it. 
-### 2.Parallel QTL detection based on GWAS results
-MRBIGR introduces the clumped method implemented in PLINK v1.9 to automatically detect and optimize QTLs based on the original GWAS results. In detail, a stricter P-value threshold –p1 is set to uncover the significantly associated SNPs; then,  for each significantly associated SNP, if the other SNPs within a 500 kb distance have P-values smaller than the second looser P-value threshold –p2, and have r2 values greater than 0.2 with the index SNP, as well as the number of such SNPs surpass the SNP number threshold –p2n, then the region is regarded as a QTL; finally, all overlapping QTLs are merged to generate the final QTL set, while the SNP with the smallest P-value in a QTL is defined as a lead SNP.The command line is as follows:
-```py
-MRBIGR.py gwas -qtl -g geno_qc -thread 6 -i output -o qtl_output -p1 1e-5 -p2 1e-3 -p2n 5  
+<pre><code class="language-py">MRBIGR.py gwas -gwas -model lmm -thread 12 -g geno_qc -p pheno_norm.csv
 </code></pre>
-<p>The subcommand gwas invokes the GWAS and QTL analysis module; parameter –qtl calls the QTL detection function; -thread is the thread number to run the command; -i is the GWAS result directory; -o is the output file prefix; -p1 is the significance threshold for index SNPs used to determine QTLs; -p2 is the secondary significance threshold for clumped SNPs used to determine the reliability of QTLs; -p2n is secondary significance SNP number in a QTL. After this step, an output file named qtl_output.qtl_res.csv would be generated.</p>
+<p>The subcommand <code>gwas</code> invokes the GWAS and QTL analysis module; parameter <code>–gwas</code> calls the GWAS function which utilizes GEMMA to perform GWAS; <code>-model</code> is the model to fit, with either linear mixed model (lmm) or linear model (lm) as option; <code>-thread</code> is the thread number to run the command; <code>-g</code> is the plink-bed format input genotype data; <code>-p</code> is the CSV format phenotype data. After this step, an output directory would be generated with the GWAS result files named <font color=blue>trait_name.assoc.txt</font> in it. </p>
+<h3 id="2parallel-qtl-detection-based-on-gwas-results">2.Parallel QTL detection based on GWAS results</h3>
+<p>MRBIGR introduces the clumped method implemented in PLINK v1.9 to automatically detect and optimize QTLs based on the original GWAS results. In detail, a stricter P-value threshold <code>–p1</code> is set to uncover the significantly associated SNPs; then,  for each significantly associated SNP, if the other SNPs within a 500 kb distance have P-values smaller than the second looser P-value threshold <code>–p2</code>, and have r2 values greater than 0.2 with the index SNP, as well as the number of such SNPs surpass the SNP number threshold <code>–p2n</code>, then the region is regarded as a QTL; finally, all overlapping QTLs are merged to generate the final QTL set, while the SNP with the smallest P-value in a QTL is defined as a lead SNP.The command line is as follows:</p>
+<pre><code class="language-py">MRBIGR.py gwas -qtl -g geno_qc -thread 6 -i output -o qtl_output -p1 1e-5 -p2 1e-3 -p2n 5  
+</code></pre>
+<p>The subcommand gwas invokes the GWAS and QTL analysis module; parameter <code>–qtl</code> calls the QTL detection function; <code>-thread</code> is the thread number to run the command; <code>-i</code> is the GWAS result directory; <code>-o</code> is the output file prefix; <code>-p1</code> is the significance threshold for index SNPs used to determine QTLs; <code>-p2</code> is the secondary significance threshold for clumped SNPs used to determine the reliability of QTLs; <code>-p2n</code> is secondary significance SNP number in a QTL. After this step, an output file named <font color=blue>qtl_output.qtl_res.csv</font> would be generated.</p>
 <h3 id="3annotation-of-qtl-regions">3.Annotation of QTL regions</h3>
 <p>The QTL result file could be annotated use a four columns gene annotation file in TSV format, which looks like this:</p>
-<pre><code class="language-shell">1.geneid  aliased position    function  
-2.Zm00001eb015280 Zm00001eb015280 1:52319290-52320913:+   Zm00001eb015280  
-3.Zm00001eb000610 Zm00001eb000610 1:2555438-2555822:+     Zm00001eb000610  
-4.Zm00001eb033210 Zm00001eb033210 1:184900367-184903962:+ Zm00001eb033210
-```  
-This file could be generated from a standard GTF format gene annotation file through the follow command:
-```shell
-grep -v '#' input.gtf |awk '{if($3==&quot;gene&quot;){print $0}}' |sed 's/ /\t/g'|sed 's/&quot;//g'|sed 's/;//g'|awk '{print $10&quot;\t&quot;$10&quot;\t&quot;$1&quot;:&quot;$4&quot;-&quot;$5&quot;:&quot;$7&quot;\t&quot;$10}'|sed '1igeneid\taliased\tposition\tfunction' &gt;gene.anno.tsv
+<pre><code class="language-shell">geneid  aliased position    function  
+Zm00001eb015280 Zm00001eb015280 1:52319290-52320913:+   Zm00001eb015280  
+Zm00001eb000610 Zm00001eb000610 1:2555438-2555822:+     Zm00001eb000610  
+Zm00001eb033210 Zm00001eb033210 1:184900367-184903962:+ Zm00001eb033210
+</code></pre>
+<p>This file could be generated from a standard GTF format gene annotation file through the follow command:</p>
+<pre><code class="language-shell">grep -v '#' input.gtf |awk '{if($3==&quot;gene&quot;){print $0}}' |sed 's/ /\t/g'|sed 's/&quot;//g'|sed 's/;//g'|awk '{print $10&quot;\t&quot;$10&quot;\t&quot;$1&quot;:&quot;$4&quot;-&quot;$5&quot;:&quot;$7&quot;\t&quot;$10}'|sed '1igeneid\taliased\tposition\tfunction' &gt;gene.anno.tsv
 </code></pre>
 <p>Then, take this file as input, QTL annotation could be performed use follow the command:</p>
 <pre><code class="language-py">MRBIGR.py gwas -anno -q qtl_output.qtl_res.csv -a gene.anno.tsv -o anno_output
-```  
-The subcommand gwas invokes the GWAS and QTL analysis module; parameter –anno calls the QTL annotation function; -q is the input QTL result file for annotation file; -o is the prefix of output file. After this step, an output file named anno_output.qtl_anno.csv would be generate.
-### 4.Visualization of GWAS results
-Manhattan-plots and QQ-plots can be generated for the visualization purpose of the GWAS results. The command line is as follows: 
-```py
-MRBIGR.py gwas -anno -q qtl_output.qtl_res.csv -a gene.anno.tsv -o anno_output  
+</code></pre>
+<p>The subcommand <code>gwas</code> invokes the GWAS and QTL analysis module; parameter <code>–anno</code> calls the QTL annotation function; <code>-q</code> is the input QTL result file for annotation file; <code>-o</code> is the prefix of output file. After this step, an output file named <font color=blue>anno_output.qtl_anno.csv</font> would be generate.</p>
+<h3 id="4visualization-of-gwas-results">4.Visualization of GWAS results</h3>
+<p>Manhattan-plots and QQ-plots can be generated for the visualization purpose of the GWAS results. The command line is as follows: </p>
+<pre><code class="language-py">MRBIGR.py gwas -visual -i output -o vis_output -thread 12  
 </code></pre>
 <p>or</p>
-<pre><code class="language-py">python MRBIGR.py gwas -visual -i output -o vis_output -multi -q qtl_output.qtl_res.csv -thread 12
-```  
-The subcommand gwas invokes the GWAS and QTL analysis module; parameter –visual calls the visualization function; -i is the GWAS result directory; -o is the output directory prefix; -multi is optional, with a multi-trait Manhattan-plot would be generate when set; -q is the input QTL result file, it only need to be set when -multi is set; -thread is the thread number to run the command.
-### 5.Statistical test of lead SNP
-A simple approach to establish the relationship of phenotype distribution and QTL haplotype type is to use genotype of the lead SNP to represent the haplotype type of the QTL region, then, phenotype values distribution under different genotype of the lead SNP could be displayed, and student’s test could be performed. This simple statistical test can be performed in MRBIGR through the command below:
-```py
-python MRBIGR.py gwas -peaktest -o peaktest_output –p pheno.csv -g geno_output_clump -q qtl_output.qtl_res.csv  
+<pre><code class="language-py">MRBIGR.py gwas -visual -i output -o vis_output -multi -q qtl_output.qtl_res.csv -thread 12
 </code></pre>
-<p>The subcommand gwas invokes the GWAS and QTL analysis module; parameter –peaktest calls the peak test function; -o is the directory of output files; -p is the input phenotype data; -g is the input genotype data; -q is the input QTL result file. Then, genotype information of each sample and phenotype distribution plot would be generated in the output directory.</p>
+<p>The subcommand <code>gwas</code> invokes the GWAS and QTL analysis module; parameter <code>–visual</code> calls the visualization function; <code>-i</code> is the GWAS result directory; <code>-o</code> is the output directory prefix; <code>-multi</code> is optional, with a multi-trait Manhattan-plot would be generate when set; <code>-q</code> is the input QTL result file, it only need to be set when <code>-multi</code> is set; <code>-thread</code> is the thread number to run the command.</p>
+<h3 id="5statistical-test-of-lead-snp">5.Statistical test of lead SNP</h3>
+<p>A simple approach to establish the relationship of phenotype distribution and QTL haplotype type is to use genotype of the lead SNP to represent the haplotype type of the QTL region, then, phenotype values distribution under different genotype of the lead SNP could be displayed, and student’s test could be performed. This simple statistical test can be performed in MRBIGR through the command below:</p>
+<pre><code class="language-py">MRBIGR.py gwas -peaktest -o peaktest_output –p pheno.csv -g geno_output_clump -q qtl_output.qtl_res.csv  
+</code></pre>
+<p>The subcommand <code>gwas</code> invokes the GWAS and QTL analysis module; parameter –peaktest calls the peak test function; <code>-o</code> is the directory of output files; <code>-p</code> is the input phenotype data; <code>-g</code> is the input genotype data; <code>-q</code> is the input QTL result file. Then, genotype information of each sample and phenotype distribution plot would be generated in the output directory.</p>
 <h3 id="6statistical-test-of-genes">6.Statistical test of genes</h3>
-<p>Another approach to establish the relationship of phenotype distribution and QTL haplotype is to test the phenotype distribution and haplotype type for each gene in the QTL, to discover potential casual gene and variants. For a QTL region, MRBIGR uses large effect variants in each gene to build gene haplotypes, and perform gene based haplotype test. Welch’s test was used for a two-group haplotype test and a Tukey’s test was used for a multiple group haplotype test as described in Yano et al, 2016. The command line is as follows:</p>
-<pre><code class="language-py">python MRBIGR.py gwas -genetest -f1 anno_output.qtl_anno.csv -f2 testvcf_anno.ZmB73_multianno.bed -vcf test.vcf –p pheno.csv -o genetest_output  
+<p>Another approach to establish the relationship of phenotype distribution and QTL haplotype is to test the phenotype distribution and haplotype type for each gene in the QTL, to discover potential casual gene and variants. For a QTL region, MRBIGR uses large effect variants in each gene to build gene haplotypes, and perform gene based haplotype test. Welch’s test was used for a two-group haplotype test and a Tukey’s test was used for a multiple group haplotype test as described in <em>Yano et al, 2016</em>. The command line is as follows:</p>
+<pre><code class="language-py">MRBIGR.py gwas -genetest -f1 anno_output.qtl_anno.csv -f2 testvcf_anno.ZmB73_multianno.bed -vcf test.vcf –p pheno.csv -o genetest_output  
 </code></pre>
-<p>The subcommand gwas invokes the GWAS and QTL analysis module; parameter –genetest calls the gene test function; -f1 is the input QTL annotation file generated by gwas –anno command; -f2 is the input genotype annotation file generated by geno –anno command; -p is the input phenotype file; -o is the directory of output files. Then, related gene haplotype information of each sample and phenotype distribution plot would be generated in the output directory.</p>
+<p>The subcommand gwas invokes the GWAS and QTL analysis module; parameter <code>–genetest</code> calls the gene test function; <code>-f1</code> is the input QTL annotation file generated by gwas <code>–anno</code> command; <code>-f2</code> is the input genotype annotation file generated by geno <code>–anno</code> command; <code>-p</code> is the input phenotype file; <code>-o</code> is the directory of output files. Then, related gene haplotype information of each sample and phenotype distribution plot would be generated in the output directory.</p>
 <h2 id="mendelian-randomization-analysis-of-multi-omics-data">Mendelian randomization analysis of multi-omics data</h2>
 <p>The Mendelian randomization analysis module can be utilized for perform Mendelian randomization analysis between different omics data, this module can be invoked through the subcommand <code>mr</code>, which includes 3 modes according to parameters. The first mode provides input omics data through the <code>-exposure</code> and <code>-outcome</code> parameters, and performs Mendelian randomization analysis between <code>-exposure</code> data and <code>-outcome</code> data; the second mode provides transcriptome expression data through the <code>-gene_exp</code> parameter, and perform Mendelian randomization analysis between gene pairs through the <code>-pairwise</code> parameter; the third mode provides transcriptome expression data through the <code>-gene_exp</code> parameter, the <code>-tf</code> parameter provides the annotation information of the transcription factor, and <code>-target</code> provides the transcription factor target gene annotation information, and then perform Mendelian randomization analysis between transcription factors and target genes. There are two calculation models for Mendelian randomization, linear model and mixed linear model, respectively, specified by the parameters <code>-lm</code> and <code>-mlm</code>.</p>
 <h3 id="1exposureoutcome-mode">1.Exposure/outcome Mode</h3>
@@ -311,7 +313,7 @@ python MRBIGR.py gwas -peaktest -o peaktest_output –p pheno.csv -g ge
 <p>The subcommand <code>mr</code> invokes the Mendelian randomization analysis module; parameter <code>-gene_exp</code> is the CSV format population gene expression data; <code>-qtl</code> is the CSV format gene QTL data; <code>-thread</code> is the thread number to run the command; <code>-g</code> is the plink-bed format input genotype data; <code>-mlm</code> represents perform Mendelian randomization analysis through mixed linear model; <code>-o</code> is the prefix of output file. After this step, a MR result file named <font color=blue>pairwise_mr_out.MR.csv</font> would be generated.</p>
 <h3 id="3tf-mode">3.TF Mode</h3>
 <p>The third mode uses the <code>-gene_exp</code> parameter to specify the population expression data while using the <code>-tf</code> and <code>-target</code> parameters to specify the transcription factor and their target genes, respectively, and then perform Mendelian randomization analysis between the transcription factors and the target genes. The regulatory relationship between transcription factors and target genes can be divided into direct and indirect regulatory relationships. In detail, when the genomic distance between a transcription factor and its target gene is &lt; 500 kb, the relationship between them is defined as direct relationship, while the regulatory relationship between the transcription factor and remaining target genes are defined as indirect regulation. The <code>-type</code> parameter is used to specify the regulatory relationship between transcription factors and target genes in Mendelian randomization analysis. The command line is as follows:</p>
-<pre><code class="language-py">MRBIGR.py mr -g geno_qc -gene_exp gene_exp.csv -tf tf_genefunc.txt -target target_genefunc.txt -mlm -qtl tf_qtl.csv -type direct -threads 12 -o tf_mr_out  
+<pre><code class="language-py">MRBIGR.py mr -g geno_qc -gene_exp gene_exp.csv -tf tf_genefunc.txt -target target_genefunc.txt -mlm -qtl tf_qtl.csv -type direct -thread 12 -o tf_mr_out  
 </code></pre>
 <p>The subcommand <code>mr</code> invokes the Mendelian randomization analysis module; parameter <code>-gene_exp</code> is the CSV format population gene expression data; <code>-qtl</code> is the CSV format transcription factor QTL data; <code>-tf</code> is the transcription factor annotation file; <code>-target</code> is the annotation files for genes targeted by transcription factors; <code>-thread</code> is the thread number to run the command; <code>-g</code> is the plink-bed format input genotype data; <code>-mlm</code> represents perform Mendelian randomization analysis through mixed linear model; <code>-type</code> is the regulatory relationship between transcription factors and target genes, with either direct (perform Mendelian randomization analysis transcription factors and directly regulated targeted genes) or all (perform Mendelian randomization analysis between transcription factors and all targeted genes) as option;<code>-o</code> is the prefix of output file. After this step, a MR result file named <font color=blue>tf_mr_out.MR.csv</font> would be generated.</br></p>
 <p><img alt="#5A9AB9" src="../img/tips%403x.png" /><strong>Tips</strong>: The transcription factor annotation file and the annotation files for genes targeted by 

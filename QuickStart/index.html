@@ -54,8 +54,6 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#1-download-and-install-mrbigr">1. Download and install MRBIGR</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#2-install-dependencies-and-configure-environment">2. Install dependencies and configure environment</a>
-    </li>
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#usage-of-mrbigr">Usage of MRBIGR</a>
@@ -117,29 +115,38 @@
 <hr />
 <h2 id="installation-of-mrbigr">Installation of MRBIGR</h2>
 <h3 id="1-download-and-install-mrbigr">1. Download and install MRBIGR <br/></h3>
-<p>1.2 Download MRBIGR </p>
-<pre><code class="language-bash">git clone https://github.com/CrazyHsu/MRBIGR.git
+<p>1.1 Download MRBIGR </p>
+<pre><code class="language-bash">git clone https://gitee.com/crazyhsu/MRBIGR.git
 </code></pre>
-<p>1.3 Activate a new conda environment</p>
-<pre><code class="language-bash">conda create -n mrbigr python=3.9 -y  
-conda activate mrbigr 
+<p>1.2 Installation using docker (recommended)</p>
+<pre><code class="language-bash">cd MRBIGR
+docker build -t mrbigr_test .
+curr_dir=$(pwd)
+conda activate mrbigr  
+docker run -it -d --name mrbigr_env -v $curr_dir/MRBIGR_data:/root/MRBIGR/MRBIGR_data -v $curr_dir/MRBIGR_output:/root/MRBIGR/MRBIGR_output mrbigr_test:latest
 </code></pre>
-<p>1.4 Build and install</p>
+<p>1.3 Installation using conda</p>
+<p>1.3.1 Build and install</p>
+<pre><code class="language-bash">conda create -n mrbigr python=3.7 -y
+conda activate mrbigr
+</code></pre>
+<p>1.3.2 Install dependencies</p>
 <pre><code class="language-bash">cd MRBIGR  
 python setup.py build  
 python setup.py install  
 </code></pre>
-<h3 id="2-install-dependencies-and-configure-environment">2. Install dependencies and configure environment<br/></h3>
-<p>2.1 Install dependencies <br/></p>
-<pre><code class="language-bash">pip install pyranges  
-conda install -y -c conda-forge r-rcppeigen r-xml r-rsqlite r-europepmc r=3.6 rpy2  
-Rscript -e 'install.packages(c(&quot;data.table&quot;, &quot;ggplot2&quot;, &quot;ggsignif&quot;, &quot;ggrepel&quot;,&quot;Matrix&quot;, &quot;igraph&quot;, &quot;network&quot;, &quot;GGally&quot;, &quot;sna&quot;,  &quot;europepmc&quot;,&quot;ggraph&quot;), repos=&quot;https://cloud.r-project.org&quot;)'  
-Rscript -e 'if (!requireNamespace(&quot;BiocManager&quot;, quietly = TRUE)) install.packages(&quot;BiocManager&quot;, repos=&quot;https://cloud.r-project.org&quot;);BiocManager::install(c(&quot;AnnotationForge&quot;,&quot;clusterProfiler&quot;))  
-Rscript -e 'install.packages(&quot;bigsnpr&quot;, dependence=T, repos=&quot;https://cloud.r-project.org&quot;)'
+<p>1.3.3. Install dependencies </p>
+<pre><code class="language-bash">pip install pyranges  
+conda install -y -c conda-forge r-rcppeigen r-xml r-rsqlite r-europepmc r=3.6 rpy2 vcftools 
+Rscript -e 'install.packages(c(&quot;data.table&quot;, &quot;ggplot2&quot;, &quot;ggsignif&quot;, &quot;ggrepel&quot;,&quot;Matrix&quot;, &quot;igraph&quot;, &quot;network&quot;, &quot;GGally&quot;, &quot;sna&quot;,&quot;tidyr&quot;,&quot;ggraph&quot;,&quot;lme4&quot;,&quot;ggpubr&quot;,&quot;pheatmap&quot;,&quot;factoextra&quot;, &quot;R.utils&quot;), repos=&quot;https://cloud.r-project.org&quot;)' 
+Rscript -e 'if (!requireNamespace(&quot;BiocManager&quot;, quietly = TRUE)) install.packages(&quot;BiocManager&quot;, repos=&quot;https://cloud.r-project.org&quot;);BiocManager::install(c(&quot;AnnotationForge&quot;,&quot;clusterProfiler&quot;,&quot;ggtree&quot;))'  
+Rscript -e 'install.packages(&quot;bigsnpr&quot;, dependence=T, repos=&quot;https://cloud.r-project.org&quot;)'
+Rscript -e 'install.packages(&quot;https://cran.r-project.org/src/contrib/Archive/FactoMineR/FactoMineR_1.42.tar.gz&quot;, repos=NULL)'
 </code></pre>
-<p>2.2 Set environment variables</p>
-<pre><code class="language-bash">echo &quot;export PATH=`pwd`/utils:\$PATH&quot; &gt;&gt; ~/.bashrc  
-source ~/.bashrc
+<p>1.3.4 Set environment variables</p>
+<pre><code class="language-bash">echo &quot;export PATH=`pwd`/utils:\$PATH&quot; &gt;&gt; ~/.bashrc  
+echo &quot;export LD_LIBRARY_PATH=`pwd`/utils/libs:\$LD_LIBRARY_PATH&quot; &gt;&gt; ~/.bashrc
+source ~/.bashrc
 </code></pre>
 <p><img alt="#f03c15" src="https://placehold.co/15x15/f03c15/f03c15.png" /> <strong>Depends</strong>: R(&gt;=3.6), python(&gt;=3.7)</p>
 <h2 id="usage-of-mrbigr">Usage of MRBIGR</h2>
@@ -159,7 +166,7 @@ source ~/.bashrc
 <p>The subcommand <code>geno</code> invokes the genotype analysis module; parameter <code>–pca</code> calls the principal component analysis function; <code>–g</code> is the plink-bed format input genotype data; <code>-o</code> is the output genotype data prefix (<code>suffix_pca</code> will be added automatically for the output files). After this step, an output file named <font color=blue>geno_pca.csv</font> would be generated in the working directory.</p>
 <h3 id="2-phenotype-data-process">2. Phenotype data process</h3>
 <p>Suppose we have a CSV format phenotype file named  <font color=blue>pheno.csv</font>, the first column and the first row should be the names of samples and traits, respectively. First, quality control of the original phenotype data should be performed through the below command:</p>
-<pre><code class="language-py">MRBIGR.py pheno –qc -p pheno.csv -o pheno_qc -mis 0.5 -val 0.1 –rout   
+<pre><code class="language-py">MRBIGR.py pheno –qc -p pheno.csv -o pheno_qc -mis 0.5 -val 0.1 –rout zscore
 </code></pre>
 <p>The subcommand <code>pheno</code> invokes the phenotype analysis module; parameter <code>–qc</code> calls the quality control function; <code>-p</code> is the input phenotype matrix; <code>-o</code> is the prefix of output file; <code>-mis</code> is the missing rate cutoff; <code>-val</code> is the small value cutoff; <code>-rout</code> means outlier removal of phenotypic values with the default method. After this step, a QC-filtered phenotype data named <font color=blue>pheno_qc.phe.csv</font> would be generated. Then, take this file as input, perform missing phenotypic value imputation through the below command: </p>
 <pre><code class="language-py">MRBIGR.py pheno –-imput -p pheno_qc.phe.csv -o pheno_imput  
@@ -206,7 +213,7 @@ source ~/.bashrc
 <p>Take the CSV format network module data, Tabular format gene ontology annotation of each gene data and Tabular format gene annotation data as inputs, gene ontology enrichment analysis of each module can be performed through the below command:</p>
 <pre><code class="language-py">MRBIGR.py go -gene_lists net_out.module.csv -go_anno go_anno.txt -gene_info gene_anno.txt -o go_out  
 </code></pre>
-<p>The subcommand <code>go</code> invokes the gene ontology enrichment analysis module; parameter <code>-gene_lists</code> is the CSV format network module data; <code>-go</code> is the tabular format gene ontology annotation of each gene data; <code>-gene_info</code> is the tabular format gene annotation data; <code>-o</code> is the prefix of output file. After this step, gene ontology enrichment analysis result <font color=blue>go_out.GO.csv</font>, visualized results of functional enrichment results <font color=blue>go_out.BP.dotplot.pdf</font>, <font color=blue>go_out.MF.dotplot.pdf</font> and <font color=blue>go_out.CC.dotplot.pdf</font> would be generated.</p>
+<p>The subcommand <code>go</code> invokes the gene ontology enrichment analysis module; parameter <code>-gene_lists</code> is the CSV format network module data; <code>-go_anno</code> is the tabular format gene ontology annotation of each gene data; <code>-gene_info</code> is the tabular format gene annotation data; <code>-o</code> is the prefix of output file. After this step, gene ontology enrichment analysis result <font color=blue>go_out.GO.csv</font>, visualized results of functional enrichment results <font color=blue>go_out.BP.dotplot.pdf</font>, <font color=blue>go_out.MF.dotplot.pdf</font> and <font color=blue>go_out.CC.dotplot.pdf</font> would be generated.</p>
 <p><img alt="fig 3" src="../img/GO.jpg" title="Visulization of GO enrichment results" />  <center>Visulization of GO enrichment results</center></p>
               
             </div>
