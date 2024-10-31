@@ -179,12 +179,14 @@ ERROR: failed to solve: crazyhsu/mrbigr_env:v1.2: failed to authorize: failed to
 <p>Please try the following code:</p>
 <pre><code class="language-bash">cd MRBIGR
 docker pull crazyhsu/mrbigr_env:v1.2  # direct pull the images without authorize
+docker build -t mrbigr_image .
 # or
 wget https://zenodo.org/records/13955396/files/mrbigr_env_v1.2.tar
 docker load -i mrbigr_env_v1.2.tar
 docker build -t mrbigr_image .
-
-curr_dir=$(pwd)
+</code></pre>
+<p>Then run the docker container:</p>
+<pre><code>curr_dir=$(pwd)
 docker run -dit --name mrbigr_env -p 3838:3838 \
     -v $curr_dir/MRBIGR_data:/root/MRBIGR/MRBIGR_data \
     -v $curr_dir/MRBIGR_output/demo:/root/MRBIGR/MRBIGR_output/demo \
